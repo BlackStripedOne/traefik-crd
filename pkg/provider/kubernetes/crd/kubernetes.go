@@ -535,7 +535,18 @@ func getNativeServiceAddress(service corev1.Service, svcPort corev1.ServicePort)
 		return "", fmt.Errorf("no clusterIP found for service: %s/%s", service.Namespace, service.Name)
 	}
 
-	log.Warn().Msgf("ClusterIP,k3s for service is", service.Spec.ClusterIP)
+	if service.Spec.Type == corev1.ServiceTypeLoadBalancer && service.Status.LoadBalancer.Ingress != nil {
+		// Use LoadBalancer IP if available
+		loadBalancerIP := service.Status.LoadBalancer.Ingress[0].IP
+		if loadBalancerIP == "" {
+			loadBalancerIP = service.Status.LoadBalancer.Ingress[0].Hostname
+		}
+		if loadBalancerIP == "" {
+			return "", fmt.Errorf("no loadBalancerIP found for service: %s/%s", service.Namespace, service.Name)
+		}
+		log.Warn().Msgf("Using loadBalanceIP for service: %s/%s -> %s", service.Namespace, service.Name, loadBalancerIP)
+		return net.JoinHostPort(loadBalancerIP, strconv.Itoa(int(svcPort.Port))), nil
+	}
 	
 	return net.JoinHostPort(service.Spec.ClusterIP, strconv.Itoa(int(svcPort.Port))), nil
 }

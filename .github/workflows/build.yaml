@@ -78,7 +78,7 @@ jobs:
         run: make binary
 
       - name: Check Path
-        run: ls -la
+        run: ls -la ./dist/
 
       - name: Artifice traefik binary
         uses: actions/upload-artifact@v2
