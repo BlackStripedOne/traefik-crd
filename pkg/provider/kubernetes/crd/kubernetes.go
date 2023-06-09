@@ -535,7 +535,7 @@ func getNativeServiceAddress(service corev1.Service, svcPort corev1.ServicePort)
 		return "", fmt.Errorf("no clusterIP found for service: %s/%s", service.Namespace, service.Name)
 	}
 
-	log.Ctx(ctx).Warn().Msgf("ClusterIP,k3s for service is", service.Spec.ClusterIP)
+	log.Warn().Msgf("ClusterIP,k3s for service is", service.Spec.ClusterIP)
 	
 	return net.JoinHostPort(service.Spec.ClusterIP, strconv.Itoa(int(svcPort.Port))), nil
 }
